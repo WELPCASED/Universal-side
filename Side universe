@@ -1,0 +1,637 @@
+-- scripthub latest update
+-- if your device is low, make a loadstring and paste the raw link
+
+-- Btw you can modify the script or steal the credits or keep the credits, idc :)
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+ScreenGui.IgnoreGuiInset = true
+
+local BlurEffect = Instance.new("BlurEffect")
+BlurEffect.Size = 0 -- Initially no blur
+BlurEffect.Parent = game.Lighting -- Add the blur to Lighting
+
+local function fadeBlur(targetSize)
+    local step = 1 -- Faster blur fade speed
+    if BlurEffect.Size < targetSize then
+        for i = BlurEffect.Size, targetSize, step do
+            BlurEffect.Size = i
+            wait(0.01) -- Faster fade-in effect
+        end
+    else
+        for i = BlurEffect.Size, targetSize, -step do
+            BlurEffect.Size = i
+            wait(0.01) -- Faster fade-out effect
+        end
+    end
+end
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 600, 0, 300) -- Bigger size for the main GUI
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -150) -- Centered
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 50) -- Dark blue color
+MainFrame.Active = true
+MainFrame.Draggable = true -- Makes it draggable
+MainFrame.Visible = false -- Initially hidden
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0.05, 0) -- Less rounded corners for a more square-like look
+UICorner.Parent = MainFrame
+
+local function applySquircle(button)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0.1, 0) -- Adjust the value for squareness
+    corner.Parent = button
+end
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(0, 180, 0, 30) -- Smaller size
+TitleLabel.Position = UDim2.new(0, 10, 0, 5) -- Top left of the GUI
+TitleLabel.Text = "ScriptHub GUI"
+TitleLabel.BackgroundTransparency = 1 -- Transparent background
+TitleLabel.TextColor3 = Color3.fromRGB(0, 255, 255) -- Cyan color
+TitleLabel.TextScaled = true
+TitleLabel.Parent = MainFrame
+
+coroutine.wrap(function()
+    while true do
+        for i = 0, 1, 0.01 do
+            TitleLabel.TextColor3 = Color3.fromRGB(0, 255 * i, 255 * (1 - i)) -- Blue to Cyan
+            wait(0.05)
+        end
+        for i = 1, 0, -0.01 do
+            TitleLabel.TextColor3 = Color3.fromRGB(0, 255 * i, 255 * (1 - i)) -- Cyan to Blue
+            wait(0.05)
+        end
+    end
+end)()
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 26, 0, 25) -- Smaller size
+CloseButton.Position = UDim2.new(1, -50, 0, 10) -- Slightly down from the top
+CloseButton.Text = "-" -- Changed text to "-"
+CloseButton.TextScaled = true -- Text scales with size
+CloseButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255) -- Blue color
+CloseButton.TextColor3 = Color3.new(1, 1, 1)
+CloseButton.Parent = MainFrame
+
+local SmallButton = Instance.new("TextButton")
+SmallButton.Size = UDim2.new(0, 40, 0, 40) -- Smaller G button
+SmallButton.Position = UDim2.new(1, -75, 0, 45) -- Position under the 3 dots in the top-right corner
+SmallButton.Text = "SH" -- Changed to "UTG"
+SmallButton.TextScaled = true -- Text scales with size
+SmallButton.BackgroundColor3 = Color3.fromRGB(10, 10, 50) -- Same dark blue color
+SmallButton.TextColor3 = Color3.new(1, 1, 1)
+SmallButton.Visible = true -- Visible initially
+SmallButton.Parent = ScreenGui
+SmallButton.Active = true
+SmallButton.Draggable = true -- Makes it draggable
+
+local SmallButtonCorner = Instance.new("UICorner")
+SmallButtonCorner.CornerRadius = UDim.new(0.2, 0) -- Slightly rounded corners for a squircle look
+SmallButtonCorner.Parent = SmallButton
+
+local CloseButtonCorner = Instance.new("UICorner")
+CloseButtonCorner.CornerRadius = UDim.new(0.2, 0) -- Slightly rounded corners for a squircle look
+CloseButtonCorner.Parent = CloseButton
+
+local TabsFrame = Instance.new("Frame")
+TabsFrame.Size = UDim2.new(0, 90, 0, 220) -- Adjusted size for tab buttons (left side)
+TabsFrame.Position = UDim2.new(0, 5, 0, 50) -- Position on the left of the tab section
+TabsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 50) -- Background color for the tabs
+TabsFrame.Parent = MainFrame
+
+local TabButtons = {}
+local tabNames = {"MAIN", "HATS", "TOOLS", "GAMES", "CREDITS"} -- Updated tab names
+
+for i, tabName in ipairs(tabNames) do
+    local TabButton = Instance.new("TextButton")
+    TabButton.Size = UDim2.new(1, 0, 0, 40) -- Size of each tab button
+    TabButton.Position = UDim2.new(0, 0, (i-1) * 0.2, 0) -- Space out each tab more
+    TabButton.Text = tabName
+    TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 60) -- Darker color for tabs
+    TabButton.TextColor3 = Color3.new(1, 1, 1)
+    TabButton.Parent = TabsFrame
+    TabButtons[tabName] = TabButton
+end
+
+-- Scrolling Frame for Buttons (centered and longer)
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Size = UDim2.new(0, 450, 0, 240) -- Adjusted size for perfect centering (longer)
+ScrollFrame.Position = UDim2.new(0, 100, 0, 40) -- Centered next to tabs
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 4, 0) -- Increased canvas size for more scrolling space
+ScrollFrame.ScrollBarThickness = 6 -- Set the thickness of the scrollbar
+ScrollFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 50) -- Slightly dark blue background
+ScrollFrame.BorderSizePixel = 0 -- No border
+ScrollFrame.Visible = true -- Keep it visible initially
+ScrollFrame.Parent = MainFrame
+
+-- Spiderman Button
+local SpidermanButton = Instance.new("TextButton")
+SpidermanButton.Size = UDim2.new(0, 275, 0, 50) -- Adjusted to fit the new frame size
+SpidermanButton.Position = UDim2.new(0, 15, 0, 0)
+SpidermanButton.Text = "Spiderman - need keyboard"
+SpidermanButton.TextScaled = true
+SpidermanButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90) -- Slightly darker blue
+SpidermanButton.TextColor3 = Color3.new(1, 1, 1)
+SpidermanButton.Parent = ScrollFrame
+applySquircle(SpidermanButton)
+
+-- Invisible Button
+local InvisibleButton = Instance.new("TextButton")
+InvisibleButton.Size = UDim2.new(0, 275, 0, 50)
+InvisibleButton.Position = UDim2.new(0, 15, 0, 60)
+InvisibleButton.Text = "Invisible"
+InvisibleButton.TextScaled = true
+InvisibleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90) -- Slightly darker blue
+InvisibleButton.TextColor3 = Color3.new(1, 1, 1)
+InvisibleButton.Parent = ScrollFrame
+applySquircle(InvisibleButton)
+
+-- Invisible V2 Button
+local InvisibleV2Button = Instance.new("TextButton")
+InvisibleV2Button.Size = UDim2.new(0, 275, 0, 50)
+InvisibleV2Button.Position = UDim2.new(0, 15, 0, 120) -- Positioned under Invisible button
+InvisibleV2Button.Text = "Invisible V2"
+InvisibleV2Button.TextScaled = true
+InvisibleV2Button.BackgroundColor3 = Color3.fromRGB(20, 20, 90) -- Slightly darker blue
+InvisibleV2Button.TextColor3 = Color3.new(1, 1, 1)
+InvisibleV2Button.Parent = ScrollFrame
+applySquircle(InvisibleV2Button)
+
+-- Invis v3 Button
+local InvisibleV3Button = Instance.new("TextButton")
+InvisibleV3Button.Size = UDim2.new(0, 275, 0, 50)
+InvisibleV3Button.Position = UDim2.new(0, 15, 0, 180) -- Positioned under Invisible V2 button
+InvisibleV3Button.Text = "Invisible V3"
+InvisibleV3Button.TextScaled = true
+InvisibleV3Button.BackgroundColor3 = Color3.fromRGB(20, 20,90) -- Slightly darker blue
+InvisibleV3Button.TextColor3 = Color3.new(1, 1, 1)
+InvisibleV3Button.Parent = ScrollFrame
+applySquircle(InvisibleV3Button)
+
+-- R6 Animations Button
+local R6AnimationsButton = Instance.new("TextButton")
+R6AnimationsButton.Size = UDim2.new(0, 275, 0, 50)
+R6AnimationsButton.Position = UDim2.new(0, 15, 0, 240) -- Positioned under Invisible V3 button
+R6AnimationsButton.Text = "R6 Animations"
+R6AnimationsButton.TextScaled = true
+R6AnimationsButton.BackgroundColor3 = Color3.fromRGB(20, 20,90) -- Slightly darker blue
+R6AnimationsButton.TextColor3 = Color3.new(1, 1, 1)
+R6AnimationsButton.Parent = ScrollFrame
+applySquircle(R6AnimationsButton)
+
+-- R6AnimsImproved Button
+local R6AnimsImproved = Instance.new("TextButton")
+R6AnimsImproved.Size = UDim2.new(0, 275, 0, 50)
+R6AnimsImproved.Position = UDim2.new(0, 15, 0, 300) -- Positioned under
+R6AnimsImproved.Text = "R6 Animations V2"
+R6AnimsImproved.TextScaled = true
+R6AnimsImproved.BackgroundColor3 = Color3.fromRGB(20, 20,90) -- Slightly darker blue
+R6AnimsImproved.TextColor3 = Color3.new(1, 1, 1)
+R6AnimsImproved.Parent = ScrollFrame
+applySquircle(R6AnimsImproved)
+
+-- Backflip Button
+local BackflipButton = Instance.new("TextButton")
+BackflipButton.Size = UDim2.new(0, 275, 0, 50)
+BackflipButton.Position = UDim2.new(0, 15, 0, 360) -- Positioned under
+BackflipButton.Text = "Backflip/FrontFlip"
+BackflipButton.TextScaled = true
+BackflipButton.BackgroundColor3 = Color3.fromRGB(20, 20,90) -- Slightly darker blue
+BackflipButton.TextColor3 = Color3.new(1, 1, 1)
+BackflipButton.Parent = ScrollFrame
+applySquircle(BackflipButton)
+
+-- Hat Orbit Button
+local HatOrbitButton = Instance.new("TextButton")
+HatOrbitButton.Size = UDim2.new(0, 275, 0, 50)
+HatOrbitButton.Position = UDim2.new(0, 15, 0, 0) -- Positioned at the top of the HATS tab
+HatOrbitButton.Text = "Hat Orbit"
+HatOrbitButton.TextScaled = true
+HatOrbitButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+HatOrbitButton.TextColor3 = Color3.new(1, 1, 1)
+HatOrbitButton.Parent = ScrollFrame
+HatOrbitButton.Visible = false -- Initially hidden under the HATS tab
+applySquircle(HatOrbitButton)
+
+-- PP Giver Button
+local PPGiverButton = Instance.new("TextButton")
+PPGiverButton.Size = UDim2.new(0, 275, 0, 50)
+PPGiverButton.Position = UDim2.new(0, 15, 0, 60) -- Positioned under Hat Orbit button
+PPGiverButton.Text = "PP Giver"
+PPGiverButton.TextScaled = true
+PPGiverButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+PPGiverButton.TextColor3 = Color3.new(1, 1, 1)
+PPGiverButton.Parent = ScrollFrame
+PPGiverButton.Visible = false -- Initially hidden under the HATS tab
+applySquircle(PPGiverButton)
+
+-- SCP96 Button
+local SCP96Button = Instance.new("TextButton")
+SCP96Button.Size = UDim2.new(0, 275, 0, 50)
+SCP96Button.Position = UDim2.new(0, 15, 0, 120) -- Positioned under
+SCP96Button.Text = "SCP 096"
+SCP96Button.TextScaled = true
+SCP96Button.BackgroundColor3 = Color3.fromRGB(20, 20, 90) -- Slightly darker blue
+SCP96Button.TextColor3 = Color3.new(1, 1, 1)
+SCP96Button.Parent = ScrollFrame
+SCP96Button.Visible = false
+applySquircle(SCP96Button)
+
+-- Sniper Button
+local SniperButton = Instance.new("TextButton")
+SniperButton.Size = UDim2.new(0, 275, 0, 50)
+SniperButton.Position = UDim2.new(0, 15, 0, 180) -- Positioned under Invisible V2 button
+SniperButton.Text = "Sniper Weapon"
+SniperButton.TextScaled = true
+SniperButton.BackgroundColor3 = Color3.fromRGB(20, 20,90) -- Slightly darker blue
+SniperButton.TextColor3 = Color3.new(1, 1, 1)
+SniperButton.Parent = ScrollFrame
+SniperButton.Visible = false
+applySquircle(SniperButton)
+
+-- GoodBadCop Button
+local GoodBadCopButton = Instance.new("TextButton")
+GoodBadCopButton.Size = UDim2.new(0, 275, 0, 50)
+GoodBadCopButton.Position = UDim2.new(0, 15, 0, 240) -- Positioned under Invisible V2 button
+GoodBadCopButton.Text = "Good Cop Bad Cop"
+GoodBadCopButton.TextScaled = true
+GoodBadCopButton.BackgroundColor3 = Color3.fromRGB(20, 20,90) -- Slightly darker blue
+GoodBadCopButton.TextColor3 = Color3.new(1, 1, 1)
+GoodBadCopButton.Parent = ScrollFrame
+GoodBadCopButton.Visible = false
+applySquircle(GoodBadCopButton)
+
+-- Infinite Yield Button
+local InfiniteYieldButton = Instance.new("TextButton")
+InfiniteYieldButton.Size = UDim2.new(0, 275, 0, 50)
+InfiniteYieldButton.Position = UDim2.new(0, 15, 0, 0) -- Positioned 
+InfiniteYieldButton.Text = "Infinite Yield"
+InfiniteYieldButton.TextScaled = true
+InfiniteYieldButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+InfiniteYieldButton.TextColor3 = Color3.new(1, 1, 1)
+InfiniteYieldButton.Parent = ScrollFrame
+InfiniteYieldButton.Visible = false -- Initially hidden under the TOOLS tab
+applySquircle(InfiniteYieldButton)
+
+-- Rochips button
+local RochipsUniversalButton = Instance.new("TextButton")
+RochipsUniversalButton.Size = UDim2.new(0, 275, 0, 50)
+RochipsUniversalButton.Position = UDim2.new(0, 15, 0, 60) -- Positioned 
+RochipsUniversalButton.Text = "Rochips Universal"
+RochipsUniversalButton.TextScaled = true
+RochipsUniversalButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+RochipsUniversalButton.TextColor3 = Color3.new(1, 1, 1)
+RochipsUniversalButton.Parent = ScrollFrame
+RochipsUniversalButton.Visible = false --Initially hidden under the TOOLS tab
+applySquircle(RochipsUniversalButton)
+
+-- Keyboard Keystroke Button
+local KKButton = Instance.new("TextButton")
+KKButton.Size = UDim2.new(0, 275, 0, 50)
+KKButton.Position = UDim2.new(0, 15, 0, 120) -- Positioned under Invisible button
+KKButton.Text = "Keyboard/Keystroke"
+KKButton.TextScaled = true
+KKButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90) -- Slightly darker blue
+KKButton.TextColor3 = Color3.new(1, 1, 1)
+KKButton.Parent = ScrollFrame
+KKButton.Visible = false
+applySquircle(KKButton)
+
+-- Free Cam Button
+local FreeCamButton = Instance.new("TextButton")
+FreeCamButton.Size = UDim2.new(0, 275, 0, 50)
+FreeCamButton.Position = UDim2.new(0, 15, 0, 180) -- Positioned
+FreeCamButton.Text = "Free Cam"
+FreeCamButton.TextScaled = true
+FreeCamButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90) -- Slightly darker blue
+FreeCamButton.TextColor3 = Color3.new(1, 1, 1)
+FreeCamButton.Parent = ScrollFrame
+FreeCamButton.Visible = false
+applySquircle(FreeCamButton)
+
+-- DomainX Button
+local DomainXButton = Instance.new("TextButton")
+DomainXButton.Size = UDim2.new(0, 275, 0, 50)
+DomainXButton.Position = UDim2.new(0, 15, 0, 240) -- Positioned under Invisible V2 button
+DomainXButton.Text = "Domain X smart script"
+DomainXButton.TextScaled = true
+DomainXButton.BackgroundColor3 = Color3.fromRGB(20, 20,90) -- Slightly darker blue
+DomainXButton.TextColor3 = Color3.new(1, 1, 1)
+DomainXButton.Parent = ScrollFrame
+DomainXButton.Visible = false
+applySquircle(DomainXButton)
+
+-- SkyHub Button
+local SkyHubButton = Instance.new("TextButton")
+SkyHubButton.Size = UDim2.new(0, 275, 0, 50)
+SkyHubButton.Position = UDim2.new(0, 15, 0, 300) -- Positioned under
+SkyHubButton.Text = "SkyHub Utility"
+SkyHubButton.TextScaled = true
+SkyHubButton.BackgroundColor3 = Color3.fromRGB(20, 20,90) -- Slightly darker blue
+SkyHubButton.TextColor3 = Color3.new(1, 1, 1)
+SkyHubButton.Parent = ScrollFrame
+SkyHubButton.Visible = false
+applySquircle(SkyHubButton)
+
+-- ChatBypassUniversal Button
+local ChatBypassUniversal = Instance.new("TextButton")
+ChatBypassUniversal.Size = UDim2.new(0, 275, 0, 50)
+ChatBypassUniversal.Position = UDim2.new(0, 15, 0, 360) -- Positioned 
+ChatBypassUniversal.Text = "Chat Bypasser Universal"
+ChatBypassUniversal.TextScaled = true
+ChatBypassUniversal.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+ChatBypassUniversal.TextColor3 = Color3.new(1, 1, 1)
+ChatBypassUniversal.Parent = ScrollFrame
+ChatBypassUniversal.Visible = false -- Initially hidden under the TOOLS tab
+applySquircle(ChatBypassUniversal)
+
+-- ChatBypassGUI Button
+local ChatBypassGUI = Instance.new("TextButton")
+ChatBypassGUI.Size = UDim2.new(0, 275, 0, 50)
+ChatBypassGUI.Position = UDim2.new(0, 15, 0, 420) -- Positioned 
+ChatBypassGUI.Text = "Nano Chat Bypasser"
+ChatBypassGUI.TextScaled = true
+ChatBypassGUI.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+ChatBypassGUI.TextColor3 = Color3.new(1, 1, 1)
+ChatBypassGUI.Parent = ScrollFrame
+ChatBypassGUI.Visible = false -- Initially hidden under the TOOLS tab
+applySquircle(ChatBypassGUI)
+
+local GameHubButton = Instance.new("TextButton")
+GameHubButton.Size = UDim2.new(0, 275, 0, 50)
+GameHubButton.Position = UDim2.new(0, 15, 0, 0) -- Positioned 
+GameHubButton.Text = "Game Hub"
+GameHubButton.TextScaled = true
+GameHubButton.BackgroundColor3 = Color3.fromRGB(20, 20,90) -- Slightly darker blue
+GameHubButton.TextColor3 = Color3.new(1, 1, 1)
+GameHubButton.Parent = ScrollFrame
+GameHubButton.Visible = false
+applySquircle(GameHubButton)
+
+-- R4D troll button
+local R4DTrollButton = Instance.new("TextButton")
+R4DTrollButton.Size = UDim2.new(0, 275, 0, 50)
+R4DTrollButton.Position = UDim2.new(0, 15, 0, 60) -- Positioned 
+R4DTrollButton.Text = "Brookhaven Trolling"
+R4DTrollButton.TextScaled = true
+R4DTrollButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+R4DTrollButton.TextColor3 = Color3.new(1, 1, 1)
+R4DTrollButton.Parent = ScrollFrame
+R4DTrollButton.Visible = false --Initially hidden under the GAMES tab
+applySquircle(R4DTrollButton)
+
+-- RMA button
+local RMAButton = Instance.new("TextButton")
+RMAButton.Size = UDim2.new(0, 275, 0, 50)
+RMAButton.Position = UDim2.new(0, 15, 0, 120) -- Positioned 
+RMAButton.Text = "Rate My Avatar GUI"
+RMAButton.TextScaled = true
+RMAButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+RMAButton.TextColor3 = Color3.new(1, 1, 1)
+RMAButton.Parent = ScrollFrame
+RMAButton.Visible = false --Initially hidden under the GAMES tab
+applySquircle(RMAButton)
+
+-- TheStrongestBattleground Button
+local TSBButton = Instance.new("TextButton")
+TSBButton.Size = UDim2.new(0, 275, 0, 50)
+TSBButton.Position = UDim2.new(0, 15, 0, 180) -- Positioned under Invisible button
+TSBButton.Text = "The Strongest Battleground"
+TSBButton.TextScaled = true
+TSBButton.BackgroundColor3 = Color3.fromRGB(20, 20, 90) -- Slightly darker blue
+TSBButton.TextColor3 = Color3.new(1, 1, 1)
+TSBButton.Parent = ScrollFrame
+TSBButton.Visible = false
+applySquircle(TSBButton)
+
+-- Credits text, keeping the credits would be nice :)
+local CreditsText = Instance.new("TextLabel")
+CreditsText.Size = UDim2.new(0, 275, 0, 50)
+CreditsText.TextScaled = true -- size itself
+CreditsText.BackgroundTransparency = 1
+CreditsText.Position = UDim2.new(0, 15, 0, 0) 
+-- Positioned 
+CreditsText.Text = "Script GUI made by @pystYT"
+CreditsText.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+CreditsText.TextColor3 = Color3.new(1, 1, 1)
+CreditsText.Parent = ScrollFrame
+CreditsText.Visible = false --Initially hidden under the CREDITS tab
+
+-- explain text
+local ExplainText = Instance.new("TextLabel")
+ExplainText.Size = UDim2.new(0, 275, 0, 50)
+ExplainText.BackgroundTransparency = 1
+ExplainText.Position = UDim2.new(0, 15, 0, 60) 
+-- Positioned 
+ExplainText.Text = "(Some scripts aren't made by me)"
+ExplainText.BackgroundColor3 = Color3.fromRGB(20, 20, 90)
+ExplainText.TextColor3 = Color3.new(1, 1, 1)
+ExplainText.Parent = ScrollFrame
+ExplainText.Visible = false --Initially hidden under the CREDITS tab
+
+-- Connect Spiderman Button to execute Spiderman script
+SpidermanButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet(('https://raw.githubusercontent.com/ItsDishan/SpidermanScript/main/Spider-Man'), true))()
+end)
+
+-- Connect Invisible Button to execute Invisible script
+InvisibleButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))()
+end)
+
+-- Connect Invisible V2 Button to execute Invisible V2 script
+InvisibleV2Button.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/5zhffJ7V"))()
+end)
+
+-- Connect Invisible V3 Button to execute Invisible V3 script
+InvisibleV3Button.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/SFr8TqM0"))()
+end)
+
+-- Connect R6 Animations Button to execute R6 Animations script
+R6AnimationsButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/gg0KgRnL"))()
+end)
+
+-- Backflip Button to execute R6 Animations script
+BackflipButton.MouseButton1Click:Connect(function()
+    loadstring (game:HttpGet('https://pastebin.com/raw/yjxXnxbS'))()
+end)
+
+-- R6animsimproved Button to execute Animations script
+R6AnimsImproved.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/MotionHubBeta/BetaMotion/refs/heads/main/MotionHubBeta"))()
+end)
+
+-- Connect Hat Orbit Button to execute Hat Orbit script
+HatOrbitButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/BingusWR/Fe-Spinning-Hat-Script/refs/heads/main/Fe%20Spinning%20Hats%20Script"))()
+end)
+
+-- Connect PP Giver Button to execute PP Giver script
+PPGiverButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet(('https://pastefy.app/uvPRV953/raw'),true))()
+end)
+
+-- Scp 096 to execute scp script
+SCP96Button.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ocfi/Scp-096-Obfuscated/refs/heads/main/obuf"))()
+end)
+
+-- Sniperbutton to execute script
+SniperButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Sniper"))()
+end)
+
+-- GoodBadCop button to execute script
+GoodBadCopButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/GenesisFE/Genesis/main/Obfuscations/Good%20Cop%20Bad%20Cop"))()
+end)
+
+-- Infinite Yield Button to execute iy
+InfiniteYieldButton.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+end)
+
+-- Rochips Universal Button to execute Rochips
+RochipsUniversalButton.MouseButton1Click:Connect(function()
+if "you wanna use rochips universal" then
+    local z_x,z_z="gzrux646yj/raw/main.ts","https://glot.io/snippets/"
+    local im,lonely,z_c=task.wait,game,loadstring
+    z_c(lonely:HttpGet(z_z..""..z_x))()
+    return ("This will load in about 2 - 30 seconds" or "according to your device and executor")
+end
+end)
+
+-- Keyboard Keystroke Button to execute KK
+KKButton.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet("https://gist.githubusercontent.com/RedZenXYZ/4d80bfd70ee27000660e4bfa7509c667/raw/da903c570249ab3c0c1a74f3467260972c3d87e6/KeyBoard%2520From%2520Ohio%2520Fr%2520Fr"))()
+end)
+
+-- freecam Button to execute
+FreeCamButton.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet("https://pastebin.com/raw/7gqxncEt"))()
+end)
+
+-- Domain X Button execution
+DomainXButton.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/DomainX/main/source',true))()
+end)
+
+-- skyhub Button to execute
+SkyHubButton.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/SkyHub.txt"))()
+end)
+
+-- Chatbypass universal Button to execute iy
+ChatBypassUniversal.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-new-roblox-chat-bypass-works-on-all-games-19439"))()
+end)
+
+-- ChatBypass gui Button to execute iy
+ChatBypassGUI.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nano-premium-18664"))()
+end)
+
+-- Gamehub Button to execute
+GameHubButton.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/GamerScripter/Game-Hub/main/loader"))()
+end)
+
+-- R4D troll Button to execute R4D
+R4DTrollButton.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet("https://scriptblox.com/raw/Brookhaven-RP-R4D-TROLL-NO-KEY-17625"))()
+end)
+
+-- RMA Button to execute RMA
+RMAButton.MouseButton1Click:Connect(function()
+loadstring(game:HttpGet("https://pastebin.com/raw/4HGr4dy1"))()
+end)
+
+-- Connect TSB Button to execute TSB script
+TSBButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mautiku/TSB-anim/main/TSBANIMS'),true))()
+end)
+
+-- Close Button Functionality
+CloseButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false -- Hide GUI
+    SmallButton.Visible = true -- Shows UTG
+    fadeBlur(0) -- Fade out blur
+end)
+
+-- Small Button to Show GUI
+SmallButton.MouseButton1Click:Connect(function()
+    SmallButton.Visible = false -- Hides the UTG
+    MainFrame.Visible = true -- Show GUI
+    fadeBlur(10) -- Fade in blur
+end)
+
+-- Functionality to toggle tabs
+for tabName, tabButton in pairs(TabButtons) do
+    tabButton.MouseButton1Click:Connect(function()
+        for _, button in ipairs(ScrollFrame:GetChildren()) do
+            if button:IsA("TextButton") then
+                button.Visible = false -- Hide all buttons initially
+            end
+        end
+
+        -- Show buttons based on selected tab
+        if tabName == "MAIN" then
+            SpidermanButton.Visible = true
+            InvisibleButton.Visible = true
+            InvisibleV2Button.Visible = true
+            InvisibleV3Button.Visible = true
+            R6AnimationsButton.Visible = true
+            BackflipButton.Visible = true
+            R6AnimsImproved.Visible = true
+            ExplainText.Visible = false
+            CreditsText.Visible = false
+        elseif tabName == "HATS" then
+            HatOrbitButton.Visible = true
+            PPGiverButton.Visible = true
+            SCP96Button.Visible = true
+            SniperButton.Visible = true
+            GoodBadCopButton.Visible = true
+            CreditsText.Visible = false
+            ExplainText.Visible = false
+        elseif tabName == "TOOLS" then
+            InfiniteYieldButton.Visible = true
+            RochipsUniversalButton.Visible = true
+            KKButton.Visible = true
+            FreeCamButton.Visible = true
+            DomainXButton.Visible = true
+            SkyHubButton.Visible = true
+            ChatBypassUniversal.Visible = true
+            ChatBypassGUI.Visible = true
+            ExplainText.Visible = false
+            CreditsText.Visible = false
+        elseif tabName == "GAMES" then
+            R4DTrollButton.Visible = true
+            RMAButton.Visible = true
+            TSBButton.Visible = true
+            GameHubButton.Visible = true
+            ExplainText.Visible = false
+            CreditsText.Visible = false
+        elseif tabName == "CREDITS" then
+            CreditsText.Visible = true
+            ExplainText.Visible = true
+        end
+    end)
+end
+
+-- Show the main GUI and apply the blur effect when the small button is clicked
+SmallButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    fadeBlur(10)
+end)
+
+-- Initializing the GUI visibility
+MainFrame.Visible = false
+fadeBlur(0) -- Start with no blur
+
+-- Script End
